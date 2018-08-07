@@ -1,0 +1,32 @@
+version: '3'
+services:
+  router-api:
+    ports:
+      - "5000:5000"
+    image:
+      willnx/vlab-router-api
+    environment:
+      - VLAB_URL=https://localhost
+      - INF_VCENTER_SERVER=virtlab.igs.corp
+      - INF_VCENTER_USER=Administrator@vsphere.local
+      - INF_VCENTER_PASSWORD=1.Password
+    volumes:
+      - ./vlab_router_api:/usr/lib/python3.6/site-packages/vlab_router_api
+    command: ["python3", "app.py"]
+
+  router-worker:
+    image:
+      willnx/vlab-router-worker
+    volumes:
+      - ./vlab_router_api:/usr/lib/python3.6/site-packages/vlab_router_api
+      - /mnt/raid/images/router:/images:ro
+      - /home/willhn/code/vlab/vlab_inf_common/vlab_inf_common:/usr/lib/python3.6/site-packages/vlab_inf_common
+    environment:
+      - INF_VCENTER_SERVER=changME
+      - INF_VCENTER_USER=changME
+      - INF_VCENTER_PASSWORD=changME
+      - INF_VCENTER_TOP_LVL_DIR=/vlab
+
+  router-broker:
+    image:
+      rabbitmq:3.7-alpine
