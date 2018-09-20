@@ -59,7 +59,7 @@ class RouterView(TaskView):
                     }
 
 
-    @requires(verify=False)
+    @requires(verify=False, version=(1,2))
     @describe(post=POST_SCHEMA, delete=DELETE_SCHEMA, get=GET_SCHEMA)
     def get(self, *args, **kwargs):
         """Display the Router instances you own"""
@@ -69,7 +69,7 @@ class RouterView(TaskView):
         resp['content'] = {'task-id': task.id}
         return ujson.dumps(resp), 200
 
-    @requires(verify=False) # XXX remove verify=False before commit
+    @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=POST_SCHEMA)
     def post(self, *args, **kwargs):
         """Create a Router"""
@@ -83,7 +83,7 @@ class RouterView(TaskView):
         resp['content'] = {'task-id': task.id}
         return ujson.dumps(resp), 200
 
-    @requires(verify=False) # XXX remove verify=False before commit
+    @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=DELETE_SCHEMA)
     def delete(self, *args, **kwargs):
         """Destroy a Router"""
@@ -95,7 +95,7 @@ class RouterView(TaskView):
         return ujson.dumps(resp), 200
 
     @route('/image', methods=["GET"])
-    @requires(verify=False)
+    @requires(verify=False, version=(1,2))
     @describe(get=IMAGES_SCHEMA)
     def image(self, *args, **kwargs):
         """Show available versions of Router that can be deployed"""
