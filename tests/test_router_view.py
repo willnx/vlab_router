@@ -44,6 +44,16 @@ class TestRouterView(unittest.TestCase):
 
         self.assertEqual(task_id, expected)
 
+    def test_get_task_link(self):
+        """RouterView - GET on /api/1/inf/router sets the Link header"""
+        resp = self.app.get('/api/1/inf/router',
+                            headers={'X-Auth': self.token})
+
+        task_id = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/router/task/asdf-asdf-asdf>; rel=status'
+
+        self.assertEqual(task_id, expected)
+
     def test_post_task(self):
         """RouterView - POST on /api/1/inf/router returns a task-id"""
         resp = self.app.post('/api/1/inf/router',
@@ -54,6 +64,19 @@ class TestRouterView(unittest.TestCase):
 
         task_id = resp.json['content']['task-id']
         expected = 'asdf-asdf-asdf'
+
+        self.assertEqual(task_id, expected)
+
+    def test_post_task_link(self):
+        """RouterView - POST on /api/1/inf/router sets the Link header"""
+        resp = self.app.post('/api/1/inf/router',
+                             headers={'X-Auth': self.token},
+                             json={'name': "myRouter",
+                                   'image': "1.0.32",
+                                   'networks': ['net1', 'net2']})
+
+        task_id = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/router/task/asdf-asdf-asdf>; rel=status'
 
         self.assertEqual(task_id, expected)
 
@@ -68,6 +91,17 @@ class TestRouterView(unittest.TestCase):
 
         self.assertEqual(task_id, expected)
 
+    def test_delete_task_link(self):
+        """RouterView - DELETE on /api/1/inf/router sets the Link header"""
+        resp = self.app.delete('/api/1/inf/router',
+                             headers={'X-Auth': self.token},
+                             json={'name': 'myRouter'})
+
+        task_id = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/router/task/asdf-asdf-asdf>; rel=status'
+
+        self.assertEqual(task_id, expected)
+
     def test_images_task(self):
         """RouterView - GET on /api/1/inf/router/image returns a task-id"""
         resp = self.app.get('/api/1/inf/router/image',
@@ -75,6 +109,16 @@ class TestRouterView(unittest.TestCase):
 
         task_id = resp.json['content']['task-id']
         expected = 'asdf-asdf-asdf'
+
+        self.assertEqual(task_id, expected)
+
+    def test_images_task_link(self):
+        """RouterView - GET on /api/1/inf/router/image sets the Link header"""
+        resp = self.app.get('/api/1/inf/router/image',
+                            headers={'X-Auth': self.token})
+
+        task_id = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/router/task/asdf-asdf-asdf>; rel=status'
 
         self.assertEqual(task_id, expected)
 
