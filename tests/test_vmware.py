@@ -21,10 +21,20 @@ class TestVMware(unittest.TestCase):
         fake_folder = MagicMock()
         fake_folder.childEntity = [fake_vm]
         fake_vCenter.return_value.__enter__.return_value.get_by_name.return_value = fake_folder
-        fake_get_info.return_value = {'worked': True, 'note': "Router=1.0.32"}
+        fake_get_info.return_value = {'component' : "Router",
+                                      'created': 1234,
+                                      'version': "1.1.8",
+                                      'configured': False,
+                                      'generation': 1,
+                                     }
 
         output = vmware.show_router(username='alice')
-        expected = {'myRouter': {'note': 'Router=1.0.32', 'worked': True}}
+        expected = {'myRouter': {'component' : "Router",
+                                 'created': 1234,
+                                 'version': "1.1.8",
+                                 'configured': False,
+                                 'generation': 1,
+                                }}
 
         self.assertEqual(output, expected)
 
@@ -33,14 +43,20 @@ class TestVMware(unittest.TestCase):
     @patch.object(vmware, 'vCenter')
     def test_delete_router(self, fake_vCenter, fake_consume_task, fake_get_info):
         """``delete_router`` returns a None when everything works as expected"""
+        fake_logger = MagicMock()
         fake_vm = MagicMock()
         fake_vm.name = 'myRouter'
         fake_folder = MagicMock()
         fake_folder.childEntity = [fake_vm]
         fake_vCenter.return_value.__enter__.return_value.get_by_name.return_value = fake_folder
-        fake_get_info.return_value = {'worked': True, 'note': "Router=1.0.32"}
+        fake_get_info.return_value = {'component' : "Router",
+                                      'created': 1234,
+                                      'version': "1.1.8",
+                                      'configured': False,
+                                      'generation': 1,
+                                     }
 
-        output = vmware.delete_router(username='alice', machine_name='myRouter')
+        output = vmware.delete_router(username='alice', machine_name='myRouter', logger=fake_logger)
         expected = None
 
         self.assertEqual(output, expected)
@@ -50,6 +66,7 @@ class TestVMware(unittest.TestCase):
     @patch.object(vmware, 'vCenter')
     def test_delete_router_value_error(self, fake_vCenter, fake_consume_task, fake_get_info):
         """``delete_router`` raises ValueError when supplied with an unknown router name"""
+        fake_logger = MagicMock()
         fake_vm = MagicMock()
         fake_vm.name = 'myRouter'
         fake_folder = MagicMock()
@@ -58,7 +75,30 @@ class TestVMware(unittest.TestCase):
         fake_get_info.return_value = {'worked': True, 'note': "Router=1.0.32"}
 
         with self.assertRaises(ValueError):
-            vmware.delete_router(username='alice', machine_name='noSuchRouter')
+            vmware.delete_router(username='alice', machine_name='noSuchRouter', logger=fake_logger)
+
+    @patch.object(vmware.virtual_machine, 'set_meta')
+    @patch.object(vmware, 'map_networks')
+    @patch.object(vmware, 'consume_task')
+    @patch.object(vmware.virtual_machine, 'get_info')
+    @patch.object(vmware.virtual_machine, 'deploy_from_ova')
+    @patch.object(vmware, 'Ova')
+    @patch.object(vmware, 'vCenter')
+    def test_create_router(self, fake_vCenter, fake_Ova, fake_deploy_from_ova, fake_get_info, fake_consume_task, fake_map_networks, fake_set_meta):
+        """``create_router`` returns a dictionary when everything works"""
+        fake_logger = MagicMock()
+        fake_deploy_from_ova.return_value.name = 'myRouter'
+        fake_map_networks.return_value = [vmware.vim.Network(moId='asdf')]
+        fake_get_info.return_value = {'worked': True}
+
+        output = vmware.create_router(username='alice',
+                                     machine_name='myRouter',
+                                     image='1.0.32',
+                                     requested_networks=['net1', 'net2'],
+                                     logger=fake_logger)
+        expected = {'myRouter': {'worked': True}}
+
+        self.assertEqual(output, expected)
 
     @patch.object(vmware, 'map_networks')
     @patch.object(vmware, 'consume_task')
@@ -66,18 +106,19 @@ class TestVMware(unittest.TestCase):
     @patch.object(vmware.virtual_machine, 'deploy_from_ova')
     @patch.object(vmware, 'Ova')
     @patch.object(vmware, 'vCenter')
-    def test_create_router(self, fake_vCenter, fake_Ova, fake_deploy_from_ova, fake_get_info, fake_consume_task, fake_map_networks):
-        """``create_router`` returns a dictionary when everything works"""
+    def test_create_router_value_error(self, fake_vCenter, fake_Ova, fake_deploy_from_ova, fake_get_info, fake_consume_task, fake_map_networks):
+        """``create_router`` raises ValueError when supplied with an invalid image/version to deploy"""
+        fake_logger = MagicMock()
+        fake_Ova.side_effect = FileNotFoundError('testing')
         fake_map_networks.return_value = [vmware.vim.Network(moId='asdf')]
         fake_get_info.return_value = {'worked': True}
 
-        output = vmware.create_router(username='alice',
+        with self.assertRaises(ValueError):
+            vmware.create_router(username='alice',
                                      machine_name='myRouter',
-                                     image='1.0.32',
-                                     requested_networks=['net1', 'net2'])
-        expected = {'worked': True}
-
-        self.assertEqual(output, expected)
+                                     image='32',
+                                     requested_networks=['net1', 'net2'],
+                                     logger=fake_logger)
 
     def test_map_networks(self):
         """``map_networks`` returns a List when everything works as expected"""
