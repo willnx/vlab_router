@@ -9,10 +9,6 @@ from vlab_inf_common.vmware import vCenter, Ova, vim, virtual_machine, consume_t
 from vlab_router_api.lib import const
 
 
-logger = get_task_logger(__name__)
-logger.setLevel(const.VLAB_ROUTER_LOG_LEVEL.upper())
-
-
 def show_router(username):
     """Obtain basic information about Router
 
@@ -34,7 +30,7 @@ def show_router(username):
     return router_vms
 
 
-def delete_router(username, machine_name):
+def delete_router(username, machine_name, logger):
     """Unregister and destroy a user's Router
 
     :Returns: None
@@ -44,6 +40,9 @@ def delete_router(username, machine_name):
 
     :param machine_name: The name of the VM to delete
     :type machine_name: String
+
+    :param logger: An object for logging messages
+    :type logger: logging.LoggerAdapter
     """
     with vCenter(host=const.INF_VCENTER_SERVER, user=const.INF_VCENTER_USER, \
                  password=const.INF_VCENTER_PASSWORD) as vcenter:
@@ -63,7 +62,7 @@ def delete_router(username, machine_name):
             raise ValueError('No {} named {} found'.format('router', machine_name))
 
 
-def create_router(username, machine_name, image, requested_networks):
+def create_router(username, machine_name, image, requested_networks, logger):
     """Deploy a new instance of Router
 
     :Returns: Dictionary
@@ -79,6 +78,9 @@ def create_router(username, machine_name, image, requested_networks):
 
     :param requested_networks: The name of the networks to connect the new Router instance up to
     :type requested_networks: List
+
+    :param logger: An object for logging messages
+    :type logger: logging.LoggerAdapter
     """
     with vCenter(host=const.INF_VCENTER_SERVER, user=const.INF_VCENTER_USER,
                  password=const.INF_VCENTER_PASSWORD) as vcenter:

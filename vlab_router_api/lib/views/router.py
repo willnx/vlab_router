@@ -64,8 +64,9 @@ class RouterView(TaskView):
     def get(self, *args, **kwargs):
         """Display the Router instances you own"""
         username = kwargs['token']['username']
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data = {'user' : username}
-        task = current_app.celery_app.send_task('router.show', [username])
+        task = current_app.celery_app.send_task('router.show', [username, txn_id])
         resp_data['content'] = {'task-id': task.id}
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
@@ -77,12 +78,13 @@ class RouterView(TaskView):
     def post(self, *args, **kwargs):
         """Create a Router"""
         username = kwargs['token']['username']
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data = {'user' : username}
         body = kwargs['body']
         machine_name = body['name']
         image = body['image']
         requested_networks = body['networks']
-        task = current_app.celery_app.send_task('router.create', [username, machine_name, image, requested_networks])
+        task = current_app.celery_app.send_task('router.create', [username, machine_name, image, requested_networks, txn_id])
         resp_data['content'] = {'task-id': task.id}
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
@@ -94,9 +96,10 @@ class RouterView(TaskView):
     def delete(self, *args, **kwargs):
         """Destroy a Router"""
         username = kwargs['token']['username']
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data = {'user' : username}
         machine_name = kwargs['body']['name']
-        task = current_app.celery_app.send_task('router.delete', [username, machine_name])
+        task = current_app.celery_app.send_task('router.delete', [username, machine_name, txn_id])
         resp_data['content'] = {'task-id': task.id}
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
@@ -109,8 +112,9 @@ class RouterView(TaskView):
     def image(self, *args, **kwargs):
         """Show available versions of Router that can be deployed"""
         username = kwargs['token']['username']
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data = {'user' : username}
-        task = current_app.celery_app.send_task('router.image')
+        task = current_app.celery_app.send_task('router.image', [txn_id])
         resp_data['content'] = {'task-id': task.id}
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
