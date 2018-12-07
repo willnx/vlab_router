@@ -86,7 +86,11 @@ def create_router(username, machine_name, image, requested_networks, logger):
                  password=const.INF_VCENTER_PASSWORD) as vcenter:
         image_name = convert_name(image)
         logger.info(image_name)
-        ova = Ova(os.path.join(const.VLAB_ROUTER_IMAGES_DIR, image_name))
+        try:
+            ova = Ova(os.path.join(const.VLAB_ROUTER_IMAGES_DIR, image_name))
+        except FileNotFoundError:
+            error = "Invalid version of Router supplied: {}".format(image)
+            raise ValueError(error)
         try:
             networks = map_networks(ova.networks, requested_networks, vcenter.networks)
             the_vm = virtual_machine.deploy_from_ova(vcenter, ova, networks,

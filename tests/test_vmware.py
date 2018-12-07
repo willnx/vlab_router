@@ -83,6 +83,26 @@ class TestVMware(unittest.TestCase):
 
         self.assertEqual(output, expected)
 
+    @patch.object(vmware, 'map_networks')
+    @patch.object(vmware, 'consume_task')
+    @patch.object(vmware.virtual_machine, 'get_info')
+    @patch.object(vmware.virtual_machine, 'deploy_from_ova')
+    @patch.object(vmware, 'Ova')
+    @patch.object(vmware, 'vCenter')
+    def test_create_router_value_error(self, fake_vCenter, fake_Ova, fake_deploy_from_ova, fake_get_info, fake_consume_task, fake_map_networks):
+        """``create_router`` raises ValueError when supplied with an invalid image/version to deploy"""
+        fake_logger = MagicMock()
+        fake_Ova.side_effect = FileNotFoundError('testing')
+        fake_map_networks.return_value = [vmware.vim.Network(moId='asdf')]
+        fake_get_info.return_value = {'worked': True}
+
+        with self.assertRaises(ValueError):
+            vmware.create_router(username='alice',
+                                     machine_name='myRouter',
+                                     image='32',
+                                     requested_networks=['net1', 'net2'],
+                                     logger=fake_logger)
+
     def test_map_networks(self):
         """``map_networks`` returns a List when everything works as expected"""
         ova_networks = ['network1', 'network2']
