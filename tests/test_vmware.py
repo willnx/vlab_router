@@ -21,20 +21,20 @@ class TestVMware(unittest.TestCase):
         fake_folder = MagicMock()
         fake_folder.childEntity = [fake_vm]
         fake_vCenter.return_value.__enter__.return_value.get_by_name.return_value = fake_folder
-        fake_get_info.return_value = {'component' : "Router",
-                                      'created': 1234,
-                                      'version': "1.1.8",
-                                      'configured': False,
-                                      'generation': 1,
-                                     }
+        fake_get_info.return_value = {'meta' : {'component' : "Router",
+                                                'created': 1234,
+                                                'version': "1.1.8",
+                                                'configured': False,
+                                                'generation': 1,
+                                                }}
 
         output = vmware.show_router(username='alice')
-        expected = {'myRouter': {'component' : "Router",
-                                 'created': 1234,
-                                 'version': "1.1.8",
-                                 'configured': False,
-                                 'generation': 1,
-                                }}
+        expected = {'myRouter': {'meta' : {'component' : "Router",
+                                           'created': 1234,
+                                           'version': "1.1.8",
+                                           'configured': False,
+                                           'generation': 1,
+                                           }}}
 
         self.assertEqual(output, expected)
 
@@ -49,12 +49,12 @@ class TestVMware(unittest.TestCase):
         fake_folder = MagicMock()
         fake_folder.childEntity = [fake_vm]
         fake_vCenter.return_value.__enter__.return_value.get_by_name.return_value = fake_folder
-        fake_get_info.return_value = {'component' : "Router",
-                                      'created': 1234,
-                                      'version': "1.1.8",
-                                      'configured': False,
-                                      'generation': 1,
-                                     }
+        fake_get_info.return_value = {'meta' : {'component' : "Router",
+                                                'created': 1234,
+                                                'version': "1.1.8",
+                                                'configured': False,
+                                                'generation': 1,
+                                                }}
 
         output = vmware.delete_router(username='alice', machine_name='myRouter', logger=fake_logger)
         expected = None
