@@ -22,7 +22,7 @@ def show_router(username):
                  password=const.INF_VCENTER_PASSWORD) as vcenter:
         folder = vcenter.get_by_name(name=username, vimtype=vim.Folder)
         for vm in folder.childEntity:
-            info = virtual_machine.get_info(vcenter, vm)
+            info = virtual_machine.get_info(vcenter, vm, username)
             if info['meta']['component'] == 'Router':
                 router_vms[vm.name] = info
     return router_vms
@@ -47,7 +47,7 @@ def delete_router(username, machine_name, logger):
         folder = vcenter.get_by_name(name=username, vimtype=vim.Folder)
         for entity in folder.childEntity:
             if entity.name == machine_name:
-                info = virtual_machine.get_info(vcenter, entity)
+                info = virtual_machine.get_info(vcenter, entity, username)
                 if info['meta']['component'] == 'Router':
                     logger.debug('powering off VM')
                     virtual_machine.power(entity, state='off')
@@ -101,7 +101,7 @@ def create_router(username, machine_name, image, requested_networks, logger):
                      'generation': 1,
                     }
         virtual_machine.set_meta(the_vm, meta_data)
-        info = virtual_machine.get_info(vcenter, the_vm)
+        info = virtual_machine.get_info(vcenter, the_vm, username)
         return {the_vm.name: info}
 
 
