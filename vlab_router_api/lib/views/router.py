@@ -18,7 +18,7 @@ logger = get_logger(__name__, loglevel=const.VLAB_ROUTER_LOG_LEVEL)
 
 class RouterView(TaskView):
     """API end point for managing routers"""
-    route_base = '/api/1/inf/router'
+    route_base = '/api/2/inf/router'
     POST_SCHEMA = { "$schema": "http://json-schema.org/draft-04/schema#",
                     "type": "object",
                     "description": "Create a router",
@@ -84,6 +84,7 @@ class RouterView(TaskView):
         machine_name = body['name']
         image = body['image']
         requested_networks = body['networks']
+        requested_networks = ['{}_{}'.format(username, x) for x in requested_networks]
         task = current_app.celery_app.send_task('router.create', [username, machine_name, image, requested_networks, txn_id])
         resp_data['content'] = {'task-id': task.id}
         resp = Response(ujson.dumps(resp_data))
